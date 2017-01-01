@@ -1,7 +1,3 @@
-	/* TODO: 
-	
-	*/
-
 	/* Linking */
 	#pragma comment(lib, "SDL2.lib")
 	#pragma comment(lib, "SDL2main.lib")
@@ -23,19 +19,7 @@
 	unsigned long long performanceFrequency;		//the frequency of the performance counter in counts per seonds
 	bool running = true;
 	bool fullscreen = false;
-	const int triangle = 1;							//id for display list
 	#define PI32 3.14159265359f
-
-void set2dProjection()
-{
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-
-	gluOrtho2D(0, screenWidth, screenHeight, 0);
-
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-}
 
 void set3dProjection()
 {
@@ -114,7 +98,7 @@ int main(int argc, char** argv)
 	performanceFrequency = SDL_GetPerformanceFrequency();
 	SDL_Init(SDL_INIT_VIDEO);
 
-	window = SDL_CreateWindow("openGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
+	window = SDL_CreateWindow("openGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL/* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
 
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
@@ -125,18 +109,7 @@ int main(int argc, char** argv)
 	SDL_GL_SetSwapInterval(1);
 
 	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-
-	//create display list, arg1=positive integer that becomes the unique name for the display list
-	glNewList(triangle, GL_COMPILE);
-		glBegin(GL_TRIANGLES);
-			glColor3f(0.0, 0.0, 1.0);
-			glVertex3f(0.0f, 2.0f, 0.0f);
-			glColor3f(0.0, 0.0, 1.0);
-			glVertex3f(-2.0f, -2.0f, 0.0f);
-			glColor3f(0.0, 0.0, 1.0);
-			glVertex3f(2.0f, -2.0f, 0.0f);
-		glEnd();
-	glEndList();
+	set3dProjection();
 
 	unsigned long long  lastCounter = SDL_GetPerformanceCounter();
 
@@ -186,55 +159,13 @@ int main(int argc, char** argv)
 
 		angle += 1;
 
-		set3dProjection();
-
 		//clear screen and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		//set drawing color
-		glColor3f(0.0f, 1.0f, 0.0f);
 
-		glTranslatef(0.0f, 0.0f, -10.0f);
-
-		//begin triangle coordinates
-		glBegin(GL_TRIANGLES);
-			glVertex3f(0.0f, 2.0f, -5.0f);
-			glVertex3f(-2.0f, -2.0f, -5.0f);
-			glVertex3f(2.0f, -2.0f, -5.0f);
-		glEnd();
-		
-		glTranslatef(0.0f, 0.0f, 0.0f);
-		glRotatef(angle, 0.0f, 0.0f, 0.5f);
-		glScalef(1.0f, 1.0f, 1.0f);
-
-		//Begin triangle coordinates
-		glBegin(GL_TRIANGLES);
-			glColor3f(1.0, 0.0, 0.0);
-			glVertex3f(0.0f, 2.0f, 0.0f);
-			glColor3f(0.0, 1.0, 0.0);
-			glVertex3f(-2.0f, -2.0f, 0.0f);
-			glColor3f(0.0, 0.0, 1.0);
-			glVertex3f(2.0f, -2.0f, 0.0f);
-		glEnd();
-
-		glTranslatef(0.0f, 0.0f, 2.0f);
-		glRotatef(angle, 0.0f, 0.0f, 0.5f);
-
-		//call display list
-		glCallList(triangle);
-
-		//Reset the modelview matrix, sets x,y,z to zero.
 		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, -5.0f);
+		glTranslatef(0.0f, 0.0f, -7.0f);
 		glRotatef(angle, 1.0f, 1.0f, 1.0f);
-
-		drawCube(1.0);
-
-		set2dProjection();
-		glColor3f(1.0f, 0.0f, 0.0f);
-
-		//draw a filled rectangle
-		glRectf(10.0f, 10.0f, 25.0f, 25.0f);
+		drawCube(2.0);
 
 		//update screen
 		SDL_GL_SwapWindow(window);
