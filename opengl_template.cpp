@@ -35,6 +35,8 @@ void set2dProjection()
 
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+
+	glDisable(GL_DEPTH_TEST);
 }
 
 void set3dProjection()
