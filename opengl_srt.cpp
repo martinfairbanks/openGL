@@ -1,3 +1,7 @@
+	/* TODO: 
+	
+	*/
+
 	/* Linking */
 	#pragma comment(lib, "SDL2.lib")
 	#pragma comment(lib, "SDL2main.lib")
@@ -13,18 +17,19 @@
 	/* Globals */
 	SDL_Window *window = 0;
 	SDL_Event event; 
-	const int screenWidth = 960;
-	const int screenHeight = 540;
+	int screenWidth = 960;
+	int screenHeight = 540;
 	float angle = 0;								//rotation
 	unsigned long long performanceFrequency;		//the frequency of the performance counter in counts per seonds
 	bool running = true;
 	bool fullscreen = false;
+
 	#define PI32 3.14159265359f
 
 void set3dProjection()
 {
 	//set viewport to window dimensions
-	//glViewport(0, 0, screenWidth, screenHeight);
+	glViewport(0, 0, screenWidth, screenHeight);
 
 	//switch to the projection matrix and reset it
 	glMatrixMode(GL_PROJECTION);
@@ -49,43 +54,49 @@ void set3dProjection()
 void drawCube(float size)
 {
 	glBegin(GL_QUADS);
-		//front face
-		glColor3f(1.0, 0.0, 0.0);
+		//front face, color each vertex to get shading
+		glColor3f(1.0f, 0.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, size / 2);
+		glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-size / 2, size / 2, size / 2);
+		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(-size / 2, -size / 2, size / 2);
+		glColor3f(0.0f, 1.0f, 0.1f);
 		glVertex3f(size / 2, -size / 2, size / 2);
 
 		//left face
-		glColor3f(0.0, 1.0, 0.0);
+		glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, -size / 2);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
 		glVertex3f(-size / 2, -size / 2, size / 2);
 
 		//back face
-		glColor3f(0.0, 0.0, 1.0);
+		glColor3f(0.6f, 0.4f, 0.7f);
 		glVertex3f(size / 2, size / 2, -size / 2);
+		glColor3f(0.6f, 0.4f, 0.7f);
 		glVertex3f(-size / 2, size / 2, -size / 2);
+		glColor3f(0.0f, 1.0f, 1.0f);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glVertex3f(size / 2, -size / 2, -size / 2);
 
 		//right face
-		glColor3f(1.0, 1.0, 0.0);
+		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, -size / 2);
 		glVertex3f(size / 2, size / 2, size / 2);
 		glVertex3f(size / 2, -size / 2, size / 2);
 		glVertex3f(size / 2, -size / 2, -size / 2);
 
 		//top face
-		glColor3f(1.0, 1.0, 1.0);
+		glColor3f(0.0f, 1.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, -size / 2);
 		glVertex3f(size / 2, size / 2, -size / 2);
 
 		//bottom face
-		glColor3f(1.0, 0.0, 1.0);
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glVertex3f(size / 2, -size / 2, size / 2);
 		glVertex3f(-size / 2, -size / 2, size / 2);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
@@ -98,7 +109,7 @@ int main(int argc, char** argv)
 	performanceFrequency = SDL_GetPerformanceFrequency();
 	SDL_Init(SDL_INIT_VIDEO);
 
-	window = SDL_CreateWindow("openGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL/* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
+	window = SDL_CreateWindow("openGL - transformations", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL/* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
 
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
@@ -119,28 +130,32 @@ int main(int argc, char** argv)
 		{
 			switch (event.type)
 			{
+				case SDL_WINDOWEVENT:
+				if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+				{
+					screenWidth = event.window.data1;
+					screenHeight = event.window.data2;
+					set3dProjection();
+				}
+				break;
+
 				case SDL_KEYDOWN:
 				{
 					switch (event.key.keysym.sym)
 					{
-						case SDLK_LEFT:
-						case SDLK_RIGHT:
-						case SDLK_UP:
-						case SDLK_DOWN:
-						case SDLK_n:
-						case SDLK_RETURN:
+					case SDLK_RETURN:
+					{
+						if (fullscreen)
 						{
-							if (fullscreen)
-							{
-								SDL_SetWindowFullscreen(window, SDL_FALSE);
-								fullscreen = false;
-							}
-							else
-							{
-								SDL_SetWindowFullscreen(window, SDL_TRUE);
-								fullscreen = true;
-							}
-						} break;
+							SDL_SetWindowFullscreen(window, SDL_FALSE);
+							fullscreen = false;
+						}
+						else
+						{
+							SDL_SetWindowFullscreen(window, SDL_TRUE);
+							fullscreen = true;
+						}
+					} break;
 					}
 				} break;
 
@@ -156,17 +171,50 @@ int main(int argc, char** argv)
 				}	break;
 			}
 		}
-
 		angle += 1;
-
+		
 		//clear screen and depth buffer
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+		
+		//first cube
+		//reset the modelview matrix, move to the center of the screen (x=y=z=0)
 		glLoadIdentity();
-		glTranslatef(0.0f, 0.0f, -7.0f);
-		glRotatef(angle, 1.0f, 1.0f, 1.0f);
-		drawCube(2.0);
+			
+		//-x = left, +x = right
+		//-y = down, +y = up
+		//-z = move forward into the screen, +z = move backwards towards the viewer
+		
+		//move 10 units to the left and 20 units into screen
+		glTranslatef(-10.0f, 0.0f, -20.0f);
+		drawCube(2.0f);
 
+		//second cube
+		//if we not reset the modelview matrix we are moving from the position that we currently were
+		glLoadIdentity();
+		glTranslatef(-4.0f, 0.0f, -20.0f);
+		
+		//rotate cube 45 degrees on the x- and y-axis
+		glRotatef(45.0f, -1.0f, 1.0f, 0.0f);
+		drawCube(2.0f);
+		
+		//third cube
+		glLoadIdentity();
+
+		//scale the cube on the x-axis
+		glScalef(2.0f, 1.0f, 1.0f);
+		glTranslatef(1.5f, 0.0f, -20.0f);
+		glRotatef(160.0f, 1.0f, 1.0f, 0.0f);
+
+		drawCube(2.0f);
+	
+		//fourth cube
+		glLoadIdentity();
+		glTranslatef(10.0f, 0.0f, -20.0f);
+		//rotate cube on all axis
+		glRotatef(angle, 1.0f, 1.0f, 0.5f);
+
+		drawCube(2.0f);
+		
 		//update screen
 		SDL_GL_SwapWindow(window);
 

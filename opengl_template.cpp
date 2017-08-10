@@ -17,8 +17,8 @@
 	/* Globals */
 	SDL_Window *window = 0;
 	SDL_Event event; 
-	const int screenWidth = 960;
-	const int screenHeight = 540;
+	int screenWidth = 960;
+	int screenHeight = 540;
 	float angle = 0;								//rotation
 	unsigned long long performanceFrequency;		//the frequency of the performance counter in counts per seonds
 	bool running = true;
@@ -39,10 +39,11 @@ void set2dProjection()
 	glDisable(GL_DEPTH_TEST);
 }
 
+
 void set3dProjection()
 {
 	//set viewport to window dimensions
-	//glViewport(0, 0, screenWidth, screenHeight);
+	glViewport(0, 0, screenWidth, screenHeight);
 
 	//switch to the projection matrix and reset it
 	glMatrixMode(GL_PROJECTION);
@@ -67,43 +68,49 @@ void set3dProjection()
 void drawCube(float size)
 {
 	glBegin(GL_QUADS);
-		//front face
-		glColor3f(1.0, 0.0, 0.0);
+		//front face, color each vertex to get shading
+		glColor3f(1.0f, 0.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, size / 2);
+		glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-size / 2, size / 2, size / 2);
+		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(-size / 2, -size / 2, size / 2);
+		glColor3f(0.0f, 1.0f, 0.1f);
 		glVertex3f(size / 2, -size / 2, size / 2);
 
 		//left face
-		glColor3f(0.0, 1.0, 0.0);
+		glColor3f(0.0f, 1.0f, 0.0f);
 		glVertex3f(-size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, -size / 2);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
 		glVertex3f(-size / 2, -size / 2, size / 2);
 
 		//back face
-		glColor3f(0.0, 0.0, 1.0);
+		glColor3f(0.6f, 0.4f, 0.7f);
 		glVertex3f(size / 2, size / 2, -size / 2);
+		glColor3f(0.6f, 0.4f, 0.7f);
 		glVertex3f(-size / 2, size / 2, -size / 2);
+		glColor3f(0.0f, 1.0f, 1.0f);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glVertex3f(size / 2, -size / 2, -size / 2);
 
 		//right face
-		glColor3f(1.0, 1.0, 0.0);
+		glColor3f(0.0f, 0.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, -size / 2);
 		glVertex3f(size / 2, size / 2, size / 2);
 		glVertex3f(size / 2, -size / 2, size / 2);
 		glVertex3f(size / 2, -size / 2, -size / 2);
 
 		//top face
-		glColor3f(1.0, 1.0, 1.0);
+		glColor3f(0.0f, 1.0f, 1.0f);
 		glVertex3f(size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, size / 2);
 		glVertex3f(-size / 2, size / 2, -size / 2);
 		glVertex3f(size / 2, size / 2, -size / 2);
 
 		//bottom face
-		glColor3f(1.0, 0.0, 1.0);
+		glColor3f(1.0f, 0.0f, 0.0f);
 		glVertex3f(size / 2, -size / 2, size / 2);
 		glVertex3f(-size / 2, -size / 2, size / 2);
 		glVertex3f(-size / 2, -size / 2, -size / 2);
@@ -116,7 +123,7 @@ int main(int argc, char** argv)
 	performanceFrequency = SDL_GetPerformanceFrequency();
 	SDL_Init(SDL_INIT_VIDEO);
 
-	window = SDL_CreateWindow("openGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_OPENGL | SDL_WINDOW_FULLSCREEN_DESKTOP);
+	window = SDL_CreateWindow("openGL", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, screenWidth, screenHeight, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL/* | SDL_WINDOW_FULLSCREEN_DESKTOP*/);
 
 	SDL_GLContext glContext = SDL_GL_CreateContext(window);
 
@@ -148,6 +155,14 @@ int main(int argc, char** argv)
 		{
 			switch (event.type)
 			{
+				case SDL_WINDOWEVENT:
+					if (event.window.event == SDL_WINDOWEVENT_SIZE_CHANGED)
+					{
+						screenWidth = event.window.data1;
+						screenHeight = event.window.data2;
+						set3dProjection();
+					}
+				break;
 				case SDL_KEYDOWN:
 				{
 					switch (event.key.keysym.sym)
@@ -196,9 +211,10 @@ int main(int argc, char** argv)
 		//set drawing color
 		glColor3f(0.0f, 1.0f, 0.0f);
 
+		//move 10 units into the screen
 		glTranslatef(0.0f, 0.0f, -10.0f);
 
-		//begin triangle coordinates
+		//draw triangle
 		glBegin(GL_TRIANGLES);
 			glVertex3f(0.0f, 2.0f, -5.0f);
 			glVertex3f(-2.0f, -2.0f, -5.0f);
@@ -209,7 +225,6 @@ int main(int argc, char** argv)
 		glRotatef(angle, 0.0f, 0.0f, 0.5f);
 		glScalef(1.0f, 1.0f, 1.0f);
 
-		//Begin triangle coordinates
 		glBegin(GL_TRIANGLES);
 			glColor3f(1.0, 0.0, 0.0);
 			glVertex3f(0.0f, 2.0f, 0.0f);
@@ -225,7 +240,7 @@ int main(int argc, char** argv)
 		//call display list
 		glCallList(triangle);
 
-		//Reset the modelview matrix, sets x,y,z to zero.
+		//reset the modelview matrix, sets x,y,z to zero.
 		glLoadIdentity();
 		glTranslatef(0.0f, 0.0f, -5.0f);
 		glRotatef(angle, 1.0f, 1.0f, 1.0f);
